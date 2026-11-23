@@ -29,6 +29,7 @@ from scripts.material_price_intelligence import (
     material_rows,
     load_integrated_data,
 )
+from scripts.scenario_dashboard import render_scenario_dashboard
 from scripts.stage5_intelligence import (
     ARCHIVE_SOURCE_UNVERIFIED,
     GSCPI_SOURCE_URL,
@@ -320,12 +321,13 @@ st.dataframe(
     },
 )
 
-market_tab, supply_tab, trade_tab, tariff_tab = st.tabs(
+market_tab, supply_tab, trade_tab, tariff_tab, simulator_tab = st.tabs(
     [
         "Material markets",
         "Supply chain",
         "Trade and freight",
         "Tariff scenarios" if is_demo_mode() else "Tariff history",
+        "Case-study simulator",
     ]
 )
 
@@ -668,3 +670,6 @@ with tariff_tab:
         "matches are text matches only; confirm current rules with official "
         "sources and legal/product classification. No RANE impact is inferred."
     )
+
+with simulator_tab:
+    render_scenario_dashboard(integrated, datasets["shipping_rates"])

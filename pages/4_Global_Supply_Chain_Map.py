@@ -3,18 +3,26 @@
 from __future__ import annotations
 
 from datetime import date
+import html
+import hashlib
 import re
 
+import folium
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
+from streamlit_folium import st_folium
 
 from scripts.app_ui import configure_page
 from scripts.data_paths import data_quality_for_mode, get_data_mode, is_demo_mode
 from scripts.global_supply_chain_map import (
+    PORT_REGION_COLORS,
+    filter_congestion_for_port,
+    filter_routes_for_focus,
+    highlighted_port_ids,
     match_congestion_to_ports,
     match_ocean_route_endpoints,
+    port_id_from_map_click,
 )
 from scripts.stage5_intelligence import (
     add_provenance_for_export,
@@ -23,6 +31,33 @@ from scripts.stage5_intelligence import (
 
 
 configure_page("Global Supply-Chain Map")
+
+ALL_CONTINENTS = (
+    "Africa",
+    "Asia & Pacific",
+    "Europe",
+    "North America",
+    "South America",
+)
+ALL_CONTINENTS_LABEL = "All continents"
+
+
+def clear_dependent_map_filters() -> None:
+    st.session_state["map_countries"] = []
+    st.session_state["map_port_search"] = ""
+    st.session_state["map_selected_port_id"] = None
+
+
+def set_map_continent(continent: str) -> None:
+    st.session_state["map_selected_continent"] = continent
+    clear_dependent_map_filters()
+
+
+def reset_map_selection() -> None:
+    st.session_state["map_selected_continent"] = ALL_CONTINENTS_LABEL
+    clear_dependent_map_filters()
+    st.session_state["map_show_routes"] = True
+
 
 @st.cache_data(show_spinner=False)
 def load(dataset_id: str, mode: str) -> pd.DataFrame:
@@ -83,42 +118,6 @@ def source_quality_caption(dataset_id: str) -> None:
         )
 
 
-def add_base_map_layout(figure: go.Figure) -> go.Figure:
-    figure.update_layout(
-        template="rane_corporate",
-        paper_bgcolor="#f4f7fa",
-        plot_bgcolor="#ffffff",
-        height=560,
-        margin={"l": 8, "r": 24, "t": 54, "b": 88},
-        legend={
-            "bgcolor": "#ffffff",
-            "bordercolor": "#dce4eb",
-            "borderwidth": 1,
-            "orientation": "h",
-            "x": 0.5,
-            "xanchor": "center",
-            "y": -0.12,
-            "yanchor": "top",
-            "font": {"size": 10},
-        },
-        geo={
-            "projection": {"type": "natural earth"},
-            "showland": True,
-            "landcolor": "#e6edf2",
-            "showocean": True,
-            "oceancolor": "#f4f7fa",
-            "showlakes": True,
-            "lakecolor": "#f4f7fa",
-            "showcoastlines": True,
-            "coastlinecolor": "#a9b8c5",
-            "showcountries": True,
-            "countrycolor": "#c8d3dc",
-            "bgcolor": "#f4f7fa",
-        },
-    )
-    return figure
-
-
 st.title("Global Supply-Chain Control Tower")
 if is_demo_mode():
     st.caption("Synthetic port, route, and congestion examples. No actual locations or live vessel tracking.")
@@ -143,34 +142,47 @@ matched_routes = match_ocean_route_endpoints(ports, benchmarks)
 matched_congestion = match_congestion_to_ports(ports, congestion)
 
 st.sidebar.header("Map filters")
-regions = sorted(ports["continent"].dropna().unique())
-selected_regions = st.sidebar.multiselect(
-    "Region / continent",
-    regions,
-    default=regions,
-    key="map_regions",
+regions = list(ALL_CONTINENTS) + sorted(
+    set(ports["continent"].dropna().astype(str)) - set(ALL_CONTINENTS)
 )
-region_ports = ports[ports["continent"].isin(selected_regions)]
-countries = sorted(region_ports["country"].dropna().unique())
+pending_continent = st.session_state.pop("map_pending_continent", None)
+if pending_continent in regions:
+    st.session_state["map_selected_continent"] = pending_continent
+    st.session_state["map_countries"] = []
+    st.session_state["map_port_search"] = ""
+selected_continent = st.sidebar.radio(
+    "Continent focus",
+    [ALL_CONTINENTS_LABEL, *regions],
+    key="map_selected_continent",
+    on_change=clear_dependent_map_filters,
+)
+country_source_ports = (
+    ports
+    if selected_continent == ALL_CONTINENTS_LABEL
+    else ports[ports["continent"].eq(selected_continent)]
+)
+countries = sorted(country_source_ports["country"].dropna().astype(str).unique())
+stored_countries = st.session_state.get("map_countries", [])
+valid_countries = [country for country in stored_countries if country in countries]
+if valid_countries != stored_countries:
+    st.session_state["map_countries"] = valid_countries
 selected_countries = st.sidebar.multiselect(
     "Country",
     countries,
-    default=[],
     key="map_countries",
 )
-if selected_countries:
-    region_ports = region_ports[region_ports["country"].isin(selected_countries)]
 
 port_search = st.sidebar.text_input(
     "Port name contains",
     help="Leave blank to include all ports in the selected region/countries.",
+    key="map_port_search",
 )
-if port_search.strip():
-    region_ports = region_ports[
-        region_ports["port"].astype(str).str.contains(
-            re.escape(port_search.strip()), case=False, na=False
-        )
-    ]
+st.sidebar.button(
+    "Reset map selection",
+    on_click=reset_map_selection,
+    key="map_reset_selection",
+    use_container_width=True,
+)
 
 selection = date_window(congestion, "week_start")
 if selection is None:
@@ -208,13 +220,6 @@ selected_week = st.sidebar.selectbox(
     key="map_snapshot_week",
 )
 
-congestion_regions = sorted(matched_congestion["region"].dropna().unique())
-selected_congestion_regions = st.sidebar.multiselect(
-    "Congestion region",
-    congestion_regions,
-    default=congestion_regions,
-    key="map_congestion_regions",
-)
 show_routes = st.sidebar.checkbox(
     "Show synthetic route examples" if is_demo_mode() else "Show matched ocean benchmark corridors",
     value=True,
@@ -228,28 +233,28 @@ animate_congestion = st.sidebar.checkbox(
     key="map_animate_congestion",
 )
 
-visible_ports = region_ports.copy()
-visible_port_names = set(
-    visible_ports["port"].dropna().astype(str).str.strip().str.casefold()
-)
+visible_ports = ports.copy()
+if selected_countries:
+    visible_ports = visible_ports[visible_ports["country"].isin(selected_countries)]
+if port_search.strip():
+    visible_ports = visible_ports[
+        visible_ports["port"].astype(str).str.contains(
+            re.escape(port_search.strip()), case=False, na=False
+        )
+    ]
+
+selected_port_id = st.session_state.get("map_selected_port_id")
+visible_port_ids = set(visible_ports["port_id"].dropna().astype(str))
+if selected_port_id is not None and str(selected_port_id) not in visible_port_ids:
+    selected_port_id = None
+    st.session_state["map_selected_port_id"] = None
 
 visible_congestion = matched_congestion[
     matched_congestion["week_start"].between(
         pd.Timestamp(period_start), pd.Timestamp(period_end)
     )
-    & matched_congestion["region"].isin(selected_congestion_regions)
-    & matched_congestion["port"].astype(str).str.strip().str.casefold().isin(visible_port_names)
+    & matched_congestion["port_id"].astype(str).isin(visible_port_ids)
 ]
-if selected_countries:
-    visible_congestion = visible_congestion[
-        visible_congestion["port_country"].isin(selected_countries)
-    ]
-if port_search.strip():
-    visible_congestion = visible_congestion[
-        visible_congestion["port"].astype(str).str.contains(
-            re.escape(port_search.strip()), case=False, na=False
-        )
-    ]
 snapshot_congestion = visible_congestion[
     visible_congestion["week_start"] == pd.Timestamp(selected_week)
 ]
@@ -260,11 +265,6 @@ if selected_countries:
         visible_routes["origin_country"].isin(selected_countries)
         | visible_routes["destination_country"].isin(selected_countries)
     ]
-if selected_regions:
-    visible_routes = visible_routes[
-        visible_routes["origin_continent"].isin(selected_regions)
-        | visible_routes["destination_continent"].isin(selected_regions)
-    ]
 if port_search.strip():
     search = re.escape(port_search.strip())
     visible_routes = visible_routes[
@@ -272,16 +272,76 @@ if port_search.strip():
         | visible_routes["destination"].str.contains(search, case=False, na=False)
     ]
 
+selected_port_row = (
+    visible_ports.loc[
+        visible_ports["port_id"].astype(str).eq(str(selected_port_id))
+    ].iloc[0]
+    if selected_port_id is not None
+    else None
+)
+focused_routes = filter_routes_for_focus(
+    visible_routes,
+    selected_continent=(
+        None
+        if selected_continent == ALL_CONTINENTS_LABEL
+        else selected_continent
+    ),
+    selected_port_name=(
+        str(selected_port_row["port"])
+        if selected_port_row is not None
+        else None
+    ),
+)
+
+st.markdown("#### Interactive continent legend")
+legend_labels = [ALL_CONTINENTS_LABEL, *regions]
+for start in range(0, len(legend_labels), 3):
+    legend_columns = st.columns(3)
+    for column, label in zip(
+        legend_columns, legend_labels[start : start + len(legend_columns)]
+    ):
+        column.button(
+            label,
+            key=f"map_legend_{label.casefold().replace(' ', '_').replace('&', 'and')}",
+            type="primary" if label == selected_continent else "secondary",
+            on_click=set_map_continent,
+            args=(label,),
+            use_container_width=True,
+        )
+
+if selected_port_row is not None:
+    focus_label = (
+        f"{selected_port_row['port']} — {selected_port_row['country']}"
+    )
+elif selected_continent != ALL_CONTINENTS_LABEL:
+    focus_label = selected_continent
+else:
+    focus_label = "All ports"
+st.caption(f"Map focus: {focus_label}. Click a port marker for details.")
+
+focus_continent = (
+    None
+    if selected_continent == ALL_CONTINENTS_LABEL
+    else selected_continent
+)
+focused_port_ids = highlighted_port_ids(
+    visible_ports,
+    selected_continent=focus_continent,
+    selected_port_id=selected_port_id,
+)
+focused_congestion = snapshot_congestion[
+    snapshot_congestion["port_id"].astype(str).isin(focused_port_ids)
+]
 metrics = st.columns(3)
-metrics[0].metric("Ports in view", f"{len(visible_ports):,}")
+metrics[0].metric("Ports highlighted", f"{len(focused_port_ids):,}")
 metrics[1].metric(
-    "Congestion",
-    f"{snapshot_congestion['port'].nunique():,}",
+    "Congestion points in focus",
+    f"{focused_congestion['port'].nunique():,}",
     selected_week.strftime("%Y-%m-%d"),
 )
 metrics[2].metric(
     "Route examples" if is_demo_mode() else "Matched corridors",
-    f"{len(visible_routes):,}" if show_routes else "Hidden",
+    f"{len(focused_routes):,}" if show_routes else "Hidden",
 )
 st.caption(
     f"Synthetic benchmark scenario date: {benchmarks['as_of'].max():%Y-%m-%d}"
@@ -289,134 +349,181 @@ st.caption(
     else f"Benchmark snapshot date: {benchmarks['as_of'].max():%Y-%m-%d}"
 )
 st.caption(
-    f"{len(visible_routes):,} of {len(matched_routes):,} route rows with exact "
-    "endpoint matches are in the current view."
+    f"{len(focused_routes):,} route rows with exact endpoint matches are in the "
+    "current view."
 )
 
-figure = go.Figure()
-if show_routes:
-    for route in visible_routes.itertuples(index=False):
-        route_label = (
-            f"{route.corridor_id}: {route.origin} → {route.destination}"
-            f"<br>{'Synthetic benchmark' if is_demo_mode() else 'Benchmark'}: "
-            f"{route.benchmark_usd:,.2f} {route.unit}"
-            f"<br>As of: {pd.Timestamp(route.as_of).date()}"
-            f"<br>Quality: {route.data_quality}"
-        )
-        figure.add_trace(
-            go.Scattergeo(
-                lon=[route.origin_longitude, route.destination_longitude],
-                lat=[route.origin_latitude, route.destination_latitude],
-                mode="lines",
-                line={"color": "#3d7c78", "width": 1.5},
-                opacity=0.7,
-                name="Endpoint connectors",
-                legendgroup="routes",
-                showlegend=False,
-                text=[route_label, route_label],
-                hovertemplate="%{text}<extra></extra>",
-            )
-        )
-    if not visible_routes.empty:
-        figure.add_trace(
-            go.Scattergeo(
-                lon=[None],
-                lat=[None],
-                mode="lines",
-                line={"color": "#3d7c78", "width": 2},
-                name="Endpoint connectors",
-                legendgroup="routes",
-            )
-        )
-
-palette = {
-    "Asia & Pacific": "#2c6782",
-    "Europe": "#4b8297",
-    "North America": "#3d7c78",
-    "South America": "#8292a4",
-    "Africa": "#6f9ea4",
-}
-for region, group in visible_ports.groupby("continent", sort=True):
-    custom = group[
-        ["port_id", "country", "continent", "locode", "latitude", "longitude"]
-    ].fillna("Not supplied").to_numpy()
-    figure.add_trace(
-        go.Scattergeo(
-            lon=group["longitude"],
-            lat=group["latitude"],
-            text=group["port"],
-            customdata=custom,
-            mode="markers",
-            marker={
-                "size": 5,
-                "color": palette.get(region, "#8292a4"),
-                "opacity": 0.76,
-                "line": {"width": 0.5, "color": "#ffffff"},
-            },
-            name=f"Port — {region}",
-            hovertemplate=(
-                "<b>%{text}</b><br>Country: %{customdata[1]}"
-                "<br>Region: %{customdata[2]}<br>LOCODE: %{customdata[3]}"
-                "<br>Coordinates: %{customdata[4]}, %{customdata[5]}"
-                f"<br>Quality: {data_quality_for_mode()}<extra></extra>"
-            ),
-        )
-    )
-
-if not snapshot_congestion.empty:
-    figure.add_trace(
-        go.Scattergeo(
-            lon=snapshot_congestion["longitude"],
-            lat=snapshot_congestion["latitude"],
-            text=snapshot_congestion["port"],
-            customdata=snapshot_congestion[
-                ["week_start", "avg_wait_days", "congestion_index", "region"]
-            ].to_numpy(),
-            mode="markers",
-            marker={
-                "size": 11,
-                "symbol": "diamond",
-                "color": snapshot_congestion["congestion_index"],
-                "colorscale": "Blues",
-                "cmin": float(matched_congestion["congestion_index"].min()),
-                "cmax": float(matched_congestion["congestion_index"].max()),
-                "showscale": True,
-                "colorbar": {
-                    "title": {
-                        "text": "Index",
-                        "font": {"color": "#26384a"},
-                        "side": "right",
-                    },
-                    "tickfont": {"color": "#52677b"},
-                    "len": 0.62,
-                    "thickness": 12,
-                },
-                "line": {"width": 0.8, "color": "#ffffff"},
-            },
-            name="Congestion point",
-            hovertemplate=(
-                "<b>%{text}</b><br>Week: %{customdata[0]|%Y-%m-%d}"
-                "<br>avg_wait_days: %{customdata[1]}"
-                "<br>congestion_index: %{customdata[2]}"
-                "<br>Congestion region: %{customdata[3]}"
-                f"<br>Quality: {data_quality_for_mode()}<extra></extra>"
-            ),
-        )
-    )
-
-figure.update_layout(
-    title=(
+map_ports = visible_ports.copy()
+map_ports["latitude"] = pd.to_numeric(map_ports["latitude"], errors="coerce")
+map_ports["longitude"] = pd.to_numeric(map_ports["longitude"], errors="coerce")
+map_ports = map_ports[
+    map_ports["latitude"].between(-90, 90)
+    & map_ports["longitude"].between(-180, 180)
+]
+highlighted_ids = highlighted_port_ids(
+    map_ports,
+    selected_continent=focus_continent,
+    selected_port_id=selected_port_id,
+)
+focus_active = focus_continent is not None or selected_port_id is not None
+if selected_port_row is not None:
+    map_title = f"Port focus — {selected_port_row['port']}"
+elif focus_continent is not None:
+    map_title = f"Port and route focus — {focus_continent}"
+else:
+    map_title = (
         "Synthetic ports and congestion"
         if is_demo_mode()
         else "Ports and selected-week congestion"
     )
+
+st.markdown(f"#### {map_title}")
+map_figure = folium.Map(
+    location=[20, 0],
+    zoom_start=2,
+    tiles="OpenStreetMap",
+    control_scale=True,
+    prefer_canvas=True,
 )
-figure = add_base_map_layout(figure)
-st.plotly_chart(figure, width="stretch", key="global_supply_chain_map")
+if show_routes:
+    route_layer = folium.FeatureGroup(name="Endpoint connectors")
+    for route in focused_routes.itertuples(index=False):
+        route_label = html.escape(
+            f"{route.corridor_id}: {route.origin} → {route.destination} | "
+            f"{'Synthetic benchmark' if is_demo_mode() else 'Benchmark'}: "
+            f"{route.benchmark_usd:,.2f} {route.unit} | "
+            f"As of: {pd.Timestamp(route.as_of).date()} | "
+            f"Quality: {route.data_quality}"
+        )
+        folium.PolyLine(
+            locations=[
+                [route.origin_latitude, route.origin_longitude],
+                [route.destination_latitude, route.destination_longitude],
+            ],
+            color="#3d7c78",
+            weight=1.5,
+            opacity=0.58,
+            tooltip=route_label,
+        ).add_to(route_layer)
+    route_layer.add_to(map_figure)
+
+port_layer = folium.FeatureGroup(name="Ports")
+for port in map_ports.itertuples(index=False):
+    port_id = str(port.port_id)
+    is_highlighted = port_id in highlighted_ids
+    if selected_port_id is not None and is_highlighted:
+        color, radius, opacity = "#1f7a83", 9, 1.0
+    elif focus_active and is_highlighted:
+        color, radius, opacity = "#2c6782", 7, 0.96
+    elif focus_active:
+        color, radius, opacity = "#aebac5", 4, 0.14
+    else:
+        color = PORT_REGION_COLORS.get(port.continent, "#8292a4")
+        radius, opacity = 5, 0.82
+    tooltip = html.escape(
+        f"{port.port} — {port.country} ({port.continent}) [{port_id}]"
+    )
+    folium.CircleMarker(
+        location=[port.latitude, port.longitude],
+        radius=radius,
+        color=color,
+        weight=1,
+        opacity=opacity,
+        fill=True,
+        fill_color=color,
+        fill_opacity=opacity,
+        tooltip=tooltip,
+    ).add_to(port_layer)
+port_layer.add_to(map_figure)
+
+if not snapshot_congestion.empty:
+    congestion_layer = folium.FeatureGroup(
+        name=(
+            f"Congestion — {selected_week:%Y-%m-%d}"
+            if is_demo_mode()
+            else f"Historical congestion — {selected_week:%Y-%m-%d}"
+        )
+    )
+    for observation in snapshot_congestion.itertuples(index=False):
+        port_id = str(observation.port_id)
+        is_highlighted = port_id in highlighted_ids
+        opacity = 0.96 if is_highlighted and focus_active else 0.8
+        if focus_active and not is_highlighted:
+            opacity = 0.12
+        color = "#1f7a83" if selected_port_id == port_id else "#7399ad"
+        tooltip_parts = [
+            f"{observation.port} [{port_id}]",
+            f"Week: {pd.Timestamp(observation.week_start):%Y-%m-%d}",
+            f"Congestion index: {observation.congestion_index}",
+            f"Average waiting days: {observation.avg_wait_days}",
+        ]
+        if pd.notna(observation.throughput_teu_mn):
+            tooltip_parts.append(
+                f"Throughput (TEU millions): {observation.throughput_teu_mn}"
+            )
+        if pd.notna(observation.vessels_at_anchor):
+            tooltip_parts.append(
+                f"Vessels at anchor: {observation.vessels_at_anchor}"
+            )
+        tooltip = html.escape(" | ".join(tooltip_parts))
+        folium.CircleMarker(
+            location=[observation.latitude, observation.longitude],
+            radius=8 if selected_port_id == port_id else 6,
+            color=color,
+            weight=1,
+            opacity=opacity,
+            fill=True,
+            fill_color=color,
+            fill_opacity=opacity,
+            tooltip=tooltip,
+        ).add_to(congestion_layer)
+    congestion_layer.add_to(map_figure)
+folium.LayerControl(collapsed=True).add_to(map_figure)
+
+selection_token = "|".join(
+    [
+        selected_continent,
+        str(selected_port_id or ""),
+        *selected_countries,
+        port_search.strip(),
+        str(period_start),
+        str(period_end),
+        str(selected_week),
+    ]
+)
+chart_key = (
+    "global_supply_chain_map_folium_"
+    + hashlib.sha1(selection_token.encode("utf-8")).hexdigest()[:12]
+)
+map_event = st_folium(
+    map_figure,
+    key=chart_key,
+    height=560,
+    use_container_width=True,
+    returned_objects=[
+        "last_clicked",
+        "last_object_clicked_tooltip",
+        "zoom",
+    ],
+)
+clicked_port_id = port_id_from_map_click(
+    map_event.get("last_object_clicked_tooltip"),
+    map_event.get("last_clicked"),
+    map_event.get("zoom"),
+    map_ports,
+)
+if clicked_port_id is not None and clicked_port_id != str(selected_port_id):
+    clicked_port = visible_ports.loc[
+        visible_ports["port_id"].astype(str).eq(clicked_port_id)
+    ].iloc[0]
+    st.session_state["map_selected_port_id"] = clicked_port_id
+    if str(clicked_port["continent"]) != selected_continent:
+        st.session_state["map_pending_continent"] = str(clicked_port["continent"])
+    st.rerun()
 st.caption(
     (
-        "All locations and benchmark endpoints are synthetic; straight connectors "
-        "are illustrative only and are not sea lanes or vessel tracks."
+        "All locations and benchmark endpoints are synthetic; connectors are "
+        "illustrative only and are not sea lanes or vessel tracks."
         if is_demo_mode()
         else "Solid lines are schematic straight endpoint connectors from archived "
         "benchmark records, not verified sea-lane geometry or vessel tracks. "
@@ -451,125 +558,188 @@ st.markdown("### Synthetic port examples" if is_demo_mode() else "### Port detai
 if visible_ports.empty:
     st.info("No ports match the selected geography filters.")
 else:
-    port_records = visible_ports.assign(_port_label=visible_ports.apply(
-        lambda row: f"{row['port']} — {row['country']} [{row['port_id']}]",
-        axis=1,
-    ))
-    selected_port_label = st.selectbox(
-        "Select a port",
-        port_records["_port_label"].tolist(),
-        key="map_port_details",
+    port_labels = {
+        str(row.port_id): f"{row.port} — {row.country} [{row.port_id}]"
+        for row in visible_ports.itertuples(index=False)
+    }
+    port_options: list[str | None] = [None, *port_labels]
+    port_selector_key = (
+        f"map_port_details_{selected_port_id or 'all'}"
     )
-    selected_port = port_records[
-        port_records["_port_label"] == selected_port_label
-    ].iloc[0]
-    st.dataframe(
-        pd.DataFrame(
-            [
-                {
-                    "Port": selected_port["port"],
-                    "Country": selected_port["country"],
-                    "Latitude": selected_port["latitude"],
-                    "Longitude": selected_port["longitude"],
-                    "LOCODE": (
-                        "Not supplied"
-                        if pd.isna(selected_port["locode"])
-                        else selected_port["locode"]
-                    ),
-                    "Data quality": data_quality_for_mode(),
-                }
-            ]
+    selected_port_choice = st.selectbox(
+        "Select a port or click a map marker",
+        port_options,
+        index=(
+            port_options.index(str(selected_port_id))
+            if selected_port_id is not None
+            else 0
         ),
-        hide_index=True,
-        width="stretch",
+        format_func=lambda value: (
+            "All ports (no individual highlight)"
+            if value is None
+            else port_labels.get(str(value), str(value))
+        ),
+        key=port_selector_key,
     )
-    observation_text = (
-        "Synthetic coordinates and records; no real observation date."
-        if is_demo_mode()
-        else "Observation date: not supplied."
-    )
-    st.caption(
-        f"Port ID: `{selected_port['port_id']}` · "
-        f"Quality: `{data_quality_for_mode()}` · {observation_text}"
-    )
+    if selected_port_choice != selected_port_id:
+        st.session_state["map_selected_port_id"] = selected_port_choice
+        if selected_port_choice is not None:
+            chosen_port = visible_ports.loc[
+                visible_ports["port_id"].astype(str).eq(str(selected_port_choice))
+            ].iloc[0]
+            st.session_state["map_selected_continent"] = str(
+                chosen_port["continent"]
+            )
+        st.rerun()
 
-    port_congestion_history = matched_congestion[
-        matched_congestion["port_id"].astype(str) == str(selected_port["port_id"])
-    ].sort_values("week_start")
-    if port_congestion_history.empty:
-        st.info(
-            "No exact unique-name port-congestion join is available for this port; "
-            "no coordinates or congestion values are substituted."
-        )
+    if selected_port_row is None:
+        st.info("Select a port from the map or the port list to inspect its details.")
     else:
-        at_selected_week = port_congestion_history[
-            port_congestion_history["week_start"] == pd.Timestamp(selected_week)
-        ]
-        if at_selected_week.empty:
-            st.info("No congestion row exists for this port at the selected week.")
-        else:
-            record = at_selected_week.iloc[0]
-            congestion_metrics = st.columns(3)
-            congestion_metrics[0].metric(
-                "Synthetic wait (days)" if is_demo_mode() else "Historical wait (days as named)",
-                f"{record['avg_wait_days']:,.1f}",
-            )
-            congestion_metrics[1].metric(
-                "Synthetic congestion index" if is_demo_mode() else "Congestion index (as stored)",
-                f"{record['congestion_index']:,.2f}",
-            )
-            congestion_metrics[2].metric(
-                "Scenario week" if is_demo_mode() else "Historical week",
-                record["week_start"].strftime("%Y-%m-%d"),
-            )
-            st.caption(
-                f"Vessels at anchor (as named): {record['vessels_at_anchor']:,}"
-            )
-
-        measure = st.selectbox(
-            "Synthetic port series" if is_demo_mode() else "Historical port series",
-            ["avg_wait_days", "congestion_index", "vessels_at_anchor", "berth_delay_hrs"],
-            key="map_port_history_measure",
+        selected_port = selected_port_row
+        selected_port_history = filter_congestion_for_port(
+            visible_congestion, str(selected_port["port_id"])
+        ).sort_values("week_start")
+        st.markdown(
+            f"#### {selected_port['port']} — {selected_port['country']}"
         )
-        filtered_history = port_congestion_history[
-            port_congestion_history["week_start"].between(
-                pd.Timestamp(period_start), pd.Timestamp(period_end)
-            )
-        ]
-        history_figure = px.line(
-            filtered_history,
-            x="week_start",
-            y=measure,
-            title=(
-                f"{selected_port['port']} — {measure} (synthetic weekly demo)"
-                if is_demo_mode()
-                else f"{selected_port['port']} — {measure} (archived weekly values)"
-            ),
-            labels={
-                "week_start": "Week",
-                measure: (
-                    f"{measure} (synthetic illustrative value)"
-                    if is_demo_mode()
-                    else f"{measure} (unit as named)"
-                ),
-            },
-        )
-        history_figure.update_layout(
-            template="rane_corporate",
-            height=330,
-        )
-        st.plotly_chart(history_figure, width="stretch")
         st.caption(
-            (
-                f"Demo dataset: `port_congestion.csv` · Quality: `{data_quality_for_mode()}`."
-                if is_demo_mode()
-                else f"Congestion provenance: `archive (2).zip::port_congestion.csv` · "
-                f"Quality: `{data_quality_for_mode()}`."
-            )
+            f"Continent: {selected_port['continent']} · "
+            f"Port ID: `{selected_port['port_id']}` · "
+            f"Quality: `{data_quality_for_mode()}`"
         )
+
+        selected_observation = (
+            selected_port_history.iloc[-1]
+            if not selected_port_history.empty
+            else None
+        )
+        detail_rows = [
+            {"Field": "Port", "Value": str(selected_port["port"])},
+            {"Field": "Country", "Value": str(selected_port["country"])},
+            {"Field": "Continent", "Value": str(selected_port["continent"])},
+        ]
+        if "vessels_total" in selected_port and pd.notna(
+            selected_port["vessels_total"]
+        ):
+            detail_rows.append(
+                {
+                    "Field": "Vessels total (as named)",
+                    "Value": str(selected_port["vessels_total"]),
+                }
+            )
+        if selected_observation is not None:
+            field_labels = (
+                ("congestion_index", "Congestion index (as stored)"),
+                ("throughput_teu_mn", "Throughput (TEU mn, as named)"),
+                ("vessels_at_anchor", "Vessels at anchor (as named)"),
+                ("avg_wait_days", "Average wait (days, as named)"),
+            )
+            for field, label in field_labels:
+                if field in selected_observation and pd.notna(
+                    selected_observation[field]
+                ):
+                    detail_rows.append(
+                        {
+                            "Field": label,
+                            "Value": str(selected_observation[field]),
+                        }
+                    )
+            detail_rows.append(
+                {
+                    "Field": (
+                        "Scenario week" if is_demo_mode() else "Historical week"
+                    ),
+                    "Value": selected_observation["week_start"].strftime(
+                        "%Y-%m-%d"
+                    ),
+                }
+            )
+        else:
+            st.info(
+                "No congestion record is available for this port in the selected "
+                "reporting period; no values are substituted."
+            )
+        st.dataframe(
+            pd.DataFrame(detail_rows),
+            hide_index=True,
+            width="stretch",
+        )
+        observation_text = (
+            "Synthetic coordinates and records; no real observation date."
+            if is_demo_mode()
+            else "Port master observation date: not supplied."
+        )
+        st.caption(observation_text)
+
+        if selected_port_history.empty:
+            st.info(
+                "No exact unique-name congestion/port join is available for this "
+                "port; no coordinates or congestion values are substituted."
+            )
+        else:
+            measure_options = [
+                measure
+                for measure in (
+                    "throughput_teu_mn",
+                    "avg_wait_days",
+                    "congestion_index",
+                    "vessels_at_anchor",
+                    "berth_delay_hrs",
+                )
+                if measure in selected_port_history
+                and selected_port_history[measure].notna().any()
+            ]
+            measure = st.selectbox(
+                "Synthetic port series" if is_demo_mode() else "Historical port series",
+                measure_options,
+                key="map_port_history_measure",
+            )
+            filtered_history = selected_port_history[
+                selected_port_history["week_start"].between(
+                    pd.Timestamp(period_start), pd.Timestamp(period_end)
+                )
+            ]
+            if filtered_history.empty:
+                st.info(
+                    "No observations for this port fall in the selected reporting period."
+                )
+            else:
+                history_figure = px.line(
+                    filtered_history,
+                    x="week_start",
+                    y=measure,
+                    title=(
+                        f"{selected_port['port']} — {measure} (synthetic weekly demo)"
+                        if is_demo_mode()
+                        else f"{selected_port['port']} — {measure} (archived weekly values)"
+                    ),
+                    labels={
+                        "week_start": "Week",
+                        measure: (
+                            f"{measure} (synthetic illustrative value)"
+                            if is_demo_mode()
+                            else f"{measure} (unit as named)"
+                        ),
+                    },
+                )
+                history_figure.update_layout(
+                    template="rane_corporate",
+                    height=330,
+                )
+                st.plotly_chart(history_figure, width="stretch")
+                st.caption(
+                    (
+                        f"Demo dataset: `port_congestion.csv` · "
+                        f"Quality: `{data_quality_for_mode()}`."
+                        if is_demo_mode()
+                        else f"Congestion provenance: "
+                        f"`archive (2).zip::port_congestion.csv` · "
+                        f"Quality: `{data_quality_for_mode()}`."
+                    )
+                )
 
 st.markdown("### Synthetic route examples" if is_demo_mode() else "### Matched route benchmarks")
-if visible_routes.empty:
+if focused_routes.empty:
     st.info(
         "No synthetic route examples match the current port filters."
         if is_demo_mode()
@@ -591,7 +761,7 @@ else:
         "data_quality",
     ]
     st.dataframe(
-        visible_routes[route_columns].sort_values("benchmark_usd"),
+        focused_routes[route_columns].sort_values("benchmark_usd"),
         hide_index=True,
         width="stretch",
         column_config={
@@ -610,7 +780,7 @@ else:
         },
     )
     route_export = add_provenance_for_export(
-        visible_routes[route_columns], "route_benchmark"
+        focused_routes[route_columns], "route_benchmark"
     )
     st.download_button(
         "Download matched route records with provenance",
@@ -638,7 +808,11 @@ if animate_congestion:
         if is_demo_mode()
         else "### Historical congestion playback"
     )
-    animation = visible_congestion.copy()
+    animation = filter_congestion_for_port(
+        visible_congestion, str(selected_port_id) if selected_port_id else None
+    )
+    if focus_continent is not None and selected_port_id is None:
+        animation = animation[animation["continent"].eq(focus_continent)]
     animation["week_label"] = animation["week_start"].dt.strftime("%Y-%m-%d")
     if animation.empty:
         st.info(
