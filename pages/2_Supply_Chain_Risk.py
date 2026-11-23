@@ -20,7 +20,7 @@ from scripts.stage5_intelligence import (
 )
 
 
-configure_page("Supply-chain Risk", "⚠️")
+configure_page("Supply-Chain Risk")
 
 
 @st.cache_data(show_spinner=False)
@@ -183,7 +183,7 @@ if view == "Chokepoints":
         ),
         labels={"date": "Date", "transits": "Transits (count as named)"},
     )
-    fig.update_layout(template="plotly_white", height=380)
+    fig.update_layout(template="rane_corporate", height=380)
     st.plotly_chart(fig, width="stretch")
     monthly_series = monthly[
         (monthly["chokepoint"] == chokepoint)
@@ -201,7 +201,7 @@ if view == "Chokepoints":
             ),
             labels={"month": "Month", "transits_per_day": "Transits per day (as named)"},
         )
-        monthly_fig.update_layout(template="plotly_white", height=330)
+        monthly_fig.update_layout(template="rane_corporate", height=330)
         st.plotly_chart(monthly_fig, width="stretch")
         st.caption(
             "Monthly and daily values are generated examples."
@@ -298,7 +298,7 @@ elif view == "Country indicators":
             ),
             labels={"month": "Month", "trade_yoy_pct": "Change (%) as named"},
         )
-        trade_fig.update_layout(template="plotly_white", height=340)
+        trade_fig.update_layout(template="rane_corporate", height=340)
         st.plotly_chart(trade_fig, width="stretch")
     show_dataset_provenance("country_monthly")
 
@@ -362,7 +362,7 @@ elif view == "Country indicators":
                         "date": "Date",
                     },
                 )
-                daily_fig.update_layout(template="plotly_white", height=330)
+                daily_fig.update_layout(template="rane_corporate", height=330)
                 st.plotly_chart(daily_fig, width="stretch")
         show_dataset_provenance("country_daily")
         st.caption(
@@ -390,7 +390,7 @@ elif view == "Global pressure":
         ),
         labels={"month": "Month", "gscpi": "Index value as stored"},
     )
-    fig.update_layout(template="plotly_white", height=400)
+    fig.update_layout(template="rane_corporate", height=400)
     st.plotly_chart(fig, width="stretch")
     if not visible.empty:
         last = visible.iloc[-1]
@@ -478,7 +478,7 @@ elif view == "Events and industry exposure":
             title=f"{industry} — {measure} as stored",
             labels={"year": "Year", measure: "Value (scale not documented)"},
         )
-        fig.update_layout(template="plotly_white", height=380)
+        fig.update_layout(template="rane_corporate", height=380)
         st.plotly_chart(fig, width="stretch")
         st.dataframe(visible, hide_index=True, width="stretch")
         show_dataset_provenance("industry_exposure")
@@ -532,7 +532,7 @@ else:
             title=f"{exporter} → {importer}: trade_value_bn_usd as supplied",
             labels={"year": "Year", "trade_value_bn_usd": "USD billions (field name)"},
         )
-        fig.update_layout(template="plotly_white", height=380)
+        fig.update_layout(template="rane_corporate", height=380)
         st.plotly_chart(fig, width="stretch")
         st.dataframe(selected, hide_index=True, width="stretch")
         show_dataset_provenance("trade_flows")

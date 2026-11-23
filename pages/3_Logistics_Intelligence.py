@@ -18,7 +18,7 @@ from scripts.stage5_intelligence import (
 )
 
 
-configure_page("Logistics Intelligence", "🚢")
+configure_page("Logistics Intelligence")
 
 
 @st.cache_data(show_spinner=False)
@@ -172,7 +172,7 @@ if view == "Port congestion":
                 ),
             },
         )
-        fig.update_layout(template="plotly_white", height=420)
+        fig.update_layout(template="rane_corporate", height=420)
         st.plotly_chart(fig, width="stretch")
         st.dataframe(visible, hide_index=True, width="stretch")
         download_csv(visible, "port_congestion", "port_congestion_filtered")
@@ -231,7 +231,7 @@ elif view == "Shipping-rate trends":
                 ),
             },
         )
-        fig.update_layout(template="plotly_white", height=420)
+        fig.update_layout(template="rane_corporate", height=420)
         st.plotly_chart(fig, width="stretch")
         st.dataframe(visible, hide_index=True, width="stretch")
         download_csv(visible, "shipping_rates", "shipping_rates_filtered")
@@ -408,7 +408,7 @@ else:
             ),
             labels={"date": "Event date", "disruption_type": "Recorded event type"},
         )
-        timeline.update_layout(template="plotly_white", height=390)
+        timeline.update_layout(template="rane_corporate", height=390)
         st.plotly_chart(timeline, width="stretch")
         st.dataframe(visible, hide_index=True, width="stretch")
         download_csv(visible, "disruption_events", "logistics_events_filtered")

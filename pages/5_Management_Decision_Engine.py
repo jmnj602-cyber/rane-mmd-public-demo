@@ -37,7 +37,7 @@ from scripts.stage5_intelligence import (
 )
 
 
-configure_page("Management Decision Support", "📈")
+configure_page("Management Decision Support")
 
 
 @st.cache_data(show_spinner=False)
@@ -254,24 +254,26 @@ review_indicators = all_indicators[
     all_indicators["status"] == "Review threshold met"
 ].copy()
 
-metric_columns = st.columns(4)
-for column, group, title in zip(
-    metric_columns,
+metric_columns = st.columns(3)
+st.caption("Counts of indicators meeting a rule-based review threshold, by category.")
+screen_groups = (
+    ({"Material market"}, "Materials"),
     (
-        "Material market",
-        "Historical chokepoint",
-        "Historical port congestion",
-        "Historical shipping rate",
+        {"Historical chokepoint", "Historical port congestion"},
+        "Supply chain",
     ),
     (
-        "Material review screens",
-        "Chokepoint review screens",
-        "Port review screens",
-        "Freight-rate review screens",
+        {
+            "Historical shipping rate",
+            "Country trade context",
+            "Country-pair trade context",
+        },
+        "Trade & freight",
     ),
-):
+)
+for column, (groups, title) in zip(metric_columns, screen_groups):
     count = int(
-        review_indicators["indicator_group"].eq(group).sum()
+        review_indicators["indicator_group"].isin(groups).sum()
     )
     column.metric(title, f"{count:,}")
 
@@ -401,7 +403,7 @@ with market_tab:
                 "<br>Source series: %{customdata[1]}<extra></extra>"
             )
         )
-        fig.update_layout(template="plotly_white", height=380)
+        fig.update_layout(template="rane_corporate", height=380)
         st.plotly_chart(fig, width="stretch")
         movement = material_indicators[
             material_indicators["indicator"].str.contains(
@@ -460,7 +462,7 @@ with supply_tab:
         ),
         labels={"month": "Month", "gscpi": "Index"},
     )
-    pressure_figure.update_layout(template="plotly_white", height=350)
+    pressure_figure.update_layout(template="rane_corporate", height=350)
     st.plotly_chart(pressure_figure, width="stretch")
     show_indicator_table(gscpi_indicator, "gscpi_context")
     st.caption(

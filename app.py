@@ -24,7 +24,7 @@ from scripts.material_price_intelligence import (
 )
 
 
-configure_page("Material Price Intelligence", "📊")
+configure_page("Material Price Intelligence")
 
 
 @st.cache_data(show_spinner="Loading integrated market history...")
@@ -128,22 +128,28 @@ source_url_values = sorted(
 )
 
 st.subheader(MATERIAL_LABELS[material])
-meta = st.columns(4)
+meta = st.columns(3)
 meta[0].metric(
     "Synthetic records" if is_demo_mode() else "Available observations",
     f"{len(all_rows):,}",
 )
 meta[1].metric(
-    "Illustrative date span" if is_demo_mode() else "Available coverage",
-    f"{data_start:%Y-%m-%d} → {data_end:%Y-%m-%d}",
+    "Date coverage",
+    f"{data_start:%Y-%m} – {data_end:%Y-%m}",
 )
-meta[2].metric("Illustrative frequency" if is_demo_mode() else "Source frequency", frequency)
-meta[3].metric(
-    "Demo generation date" if is_demo_mode() else "Source extraction date",
-    source_extraction_date(all_rows),
+meta[2].metric(
+    "Frequency",
+    "Daily" if frequency.startswith("Daily") else frequency,
 )
 st.caption(
-    f"Currency: **{', '.join(currency_values)}** · "
+    (
+        f"Demo generated: {source_extraction_date(all_rows)}"
+        if is_demo_mode()
+        else f"Source extraction: {source_extraction_date(all_rows)}"
+    )
+    + f" · Coverage: {data_start:%Y-%m-%d} to {data_end:%Y-%m-%d}"
+    + f" · Reporting frequency: {frequency}"
+    + f" · Currency: **{', '.join(currency_values)}** · "
     f"Source unit: **{', '.join(unit_values)}**"
 )
 
@@ -171,7 +177,7 @@ if material == "Natural Rubber" and not is_demo_mode():
 if not filtered.empty:
     latest = all_rows.iloc[-1]
     latest_filtered = filtered.iloc[-1]
-    latest_cols = st.columns(4)
+    latest_cols = st.columns(3)
     latest_cols[0].metric(
         "Latest demo record" if is_demo_mode() else "Latest available observation",
         format_value(latest["value"], str(latest["currency"])),
@@ -183,10 +189,9 @@ if not filtered.empty:
         str(latest_filtered["date"].date()),
     )
     latest_cols[2].metric("Selected observations", f"{len(filtered):,}")
-    latest_cols[3].metric(
-        "Selected range",
-        f"{filtered.iloc[0]['date']:%Y-%m-%d} → "
-        f"{filtered.iloc[-1]['date']:%Y-%m-%d}",
+    st.caption(
+        f"Selected dates: {filtered.iloc[0]['date']:%Y-%m-%d} to "
+        f"{filtered.iloc[-1]['date']:%Y-%m-%d}"
     )
 else:
     st.warning(
@@ -222,7 +227,7 @@ if not filtered.empty:
         )
     )
     figure.update_layout(
-        template="plotly_white",
+        template="rane_corporate",
         height=430,
         margin={"l": 10, "r": 10, "t": 55, "b": 10},
         yaxis_title=f"Value ({currency_values[0]})",

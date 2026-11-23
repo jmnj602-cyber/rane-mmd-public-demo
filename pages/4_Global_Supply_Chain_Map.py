@@ -1,4 +1,4 @@
-"""Dark control-tower map for archived ports, corridors, and congestion."""
+"""Corporate control-tower map for ports, route benchmarks, and congestion."""
 
 from __future__ import annotations
 
@@ -22,24 +22,7 @@ from scripts.stage5_intelligence import (
 )
 
 
-configure_page("Global Supply-Chain Map", "🌐")
-
-st.markdown(
-    """
-    <style>
-    .stApp { background: #0b1220; color: #e6edf7; }
-    [data-testid="stHeader"] { background: rgba(11, 18, 32, 0.92); }
-    [data-testid="stSidebar"] { background: #101a2b; }
-    [data-testid="stMetric"] {
-        background: #111d30; border: 1px solid #26364f;
-        padding: 14px; border-radius: 8px;
-    }
-    [data-testid="stMarkdownContainer"] p { color: #d3deec; }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
+configure_page("Global Supply-Chain Map")
 
 @st.cache_data(show_spinner=False)
 def load(dataset_id: str, mode: str) -> pd.DataFrame:
@@ -102,25 +85,35 @@ def source_quality_caption(dataset_id: str) -> None:
 
 def add_base_map_layout(figure: go.Figure) -> go.Figure:
     figure.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="#0b1220",
-        plot_bgcolor="#0b1220",
-        height=650,
-        margin={"l": 8, "r": 8, "t": 58, "b": 8},
-        legend={"bgcolor": "rgba(17,29,48,0.82)", "bordercolor": "#26364f"},
+        template="rane_corporate",
+        paper_bgcolor="#f4f7fa",
+        plot_bgcolor="#ffffff",
+        height=560,
+        margin={"l": 8, "r": 24, "t": 54, "b": 88},
+        legend={
+            "bgcolor": "#ffffff",
+            "bordercolor": "#dce4eb",
+            "borderwidth": 1,
+            "orientation": "h",
+            "x": 0.5,
+            "xanchor": "center",
+            "y": -0.12,
+            "yanchor": "top",
+            "font": {"size": 10},
+        },
         geo={
             "projection": {"type": "natural earth"},
             "showland": True,
-            "landcolor": "#1b2a3d",
+            "landcolor": "#e6edf2",
             "showocean": True,
-            "oceancolor": "#0d1a2a",
+            "oceancolor": "#f4f7fa",
             "showlakes": True,
-            "lakecolor": "#0d1a2a",
+            "lakecolor": "#f4f7fa",
             "showcoastlines": True,
-            "coastlinecolor": "#52657e",
+            "coastlinecolor": "#a9b8c5",
             "showcountries": True,
-            "countrycolor": "#34465d",
-            "bgcolor": "#0b1220",
+            "countrycolor": "#c8d3dc",
+            "bgcolor": "#f4f7fa",
         },
     )
     return figure
@@ -279,21 +272,25 @@ if port_search.strip():
         | visible_routes["destination"].str.contains(search, case=False, na=False)
     ]
 
-metrics = st.columns(4)
+metrics = st.columns(3)
 metrics[0].metric("Ports in view", f"{len(visible_ports):,}")
 metrics[1].metric(
-    "Synthetic congestion points" if is_demo_mode() else "Historical congestion points",
+    "Congestion",
     f"{snapshot_congestion['port'].nunique():,}",
     selected_week.strftime("%Y-%m-%d"),
 )
 metrics[2].metric(
-    "Matched ocean corridors",
+    "Route examples" if is_demo_mode() else "Matched corridors",
     f"{len(visible_routes):,}" if show_routes else "Hidden",
-    f"of {len(matched_routes):,} exact coordinate matches",
 )
-metrics[3].metric(
-    "Synthetic benchmark date" if is_demo_mode() else "Benchmark snapshot",
-    benchmarks["as_of"].max().strftime("%Y-%m-%d"),
+st.caption(
+    f"Synthetic benchmark scenario date: {benchmarks['as_of'].max():%Y-%m-%d}"
+    if is_demo_mode()
+    else f"Benchmark snapshot date: {benchmarks['as_of'].max():%Y-%m-%d}"
+)
+st.caption(
+    f"{len(visible_routes):,} of {len(matched_routes):,} route rows with exact "
+    "endpoint matches are in the current view."
 )
 
 figure = go.Figure()
@@ -311,13 +308,9 @@ if show_routes:
                 lon=[route.origin_longitude, route.destination_longitude],
                 lat=[route.origin_latitude, route.destination_latitude],
                 mode="lines",
-                line={"color": "#38bdf8", "width": 1.4},
-                opacity=0.65,
-                name=(
-                    "Synthetic endpoint connector"
-                    if is_demo_mode()
-                    else "Archived benchmark endpoint connector"
-                ),
+                line={"color": "#3d7c78", "width": 1.5},
+                opacity=0.7,
+                name="Endpoint connectors",
                 legendgroup="routes",
                 showlegend=False,
                 text=[route_label, route_label],
@@ -330,18 +323,18 @@ if show_routes:
                 lon=[None],
                 lat=[None],
                 mode="lines",
-                line={"color": "#38bdf8", "width": 2},
-                name="Matched benchmark endpoint connectors",
+                line={"color": "#3d7c78", "width": 2},
+                name="Endpoint connectors",
                 legendgroup="routes",
             )
         )
 
 palette = {
-    "Asia & Pacific": "#60a5fa",
-    "Europe": "#a78bfa",
-    "North America": "#34d399",
-    "South America": "#fbbf24",
-    "Africa": "#fb7185",
+    "Asia & Pacific": "#2c6782",
+    "Europe": "#4b8297",
+    "North America": "#3d7c78",
+    "South America": "#8292a4",
+    "Africa": "#6f9ea4",
 }
 for region, group in visible_ports.groupby("continent", sort=True):
     custom = group[
@@ -356,11 +349,11 @@ for region, group in visible_ports.groupby("continent", sort=True):
             mode="markers",
             marker={
                 "size": 5,
-                "color": palette.get(region, "#94a3b8"),
+                "color": palette.get(region, "#8292a4"),
                 "opacity": 0.76,
-                "line": {"width": 0.25, "color": "#0b1220"},
+                "line": {"width": 0.5, "color": "#ffffff"},
             },
-            name=f"Port location — {region}",
+            name=f"Port — {region}",
             hovertemplate=(
                 "<b>%{text}</b><br>Country: %{customdata[1]}"
                 "<br>Region: %{customdata[2]}<br>LOCODE: %{customdata[3]}"
@@ -384,28 +377,23 @@ if not snapshot_congestion.empty:
                 "size": 11,
                 "symbol": "diamond",
                 "color": snapshot_congestion["congestion_index"],
-                "colorscale": "YlOrRd",
+                "colorscale": "Blues",
                 "cmin": float(matched_congestion["congestion_index"].min()),
                 "cmax": float(matched_congestion["congestion_index"].max()),
                 "showscale": True,
                 "colorbar": {
                     "title": {
-                        "text": (
-                            "Synthetic congestion index"
-                            if is_demo_mode()
-                            else "Congestion index<br>(as stored)"
-                        ),
-                        "font": {"color": "#d3deec"},
+                        "text": "Index",
+                        "font": {"color": "#26384a"},
+                        "side": "right",
                     },
-                    "tickfont": {"color": "#d3deec"},
+                    "tickfont": {"color": "#52677b"},
+                    "len": 0.62,
+                    "thickness": 12,
                 },
-                "line": {"width": 0.8, "color": "#f8fafc"},
+                "line": {"width": 0.8, "color": "#ffffff"},
             },
-            name=(
-                "Synthetic congestion example"
-                if is_demo_mode()
-                else "Historical congestion observation"
-            ),
+            name="Congestion point",
             hovertemplate=(
                 "<b>%{text}</b><br>Week: %{customdata[0]|%Y-%m-%d}"
                 "<br>avg_wait_days: %{customdata[1]}"
@@ -418,9 +406,9 @@ if not snapshot_congestion.empty:
 
 figure.update_layout(
     title=(
-        "Synthetic port and congestion examples with illustrative connectors"
+        "Synthetic ports and congestion"
         if is_demo_mode()
-        else "Port locations, selected-week congestion and matched routes"
+        else "Ports and selected-week congestion"
     )
 )
 figure = add_base_map_layout(figure)
@@ -475,16 +463,25 @@ else:
     selected_port = port_records[
         port_records["_port_label"] == selected_port_label
     ].iloc[0]
-    detail_columns = st.columns(4)
-    detail_columns[0].metric("Port", str(selected_port["port"]))
-    detail_columns[1].metric("Country", str(selected_port["country"]))
-    detail_columns[2].metric(
-        "Coordinates",
-        f"{selected_port['latitude']:.4f}, {selected_port['longitude']:.4f}",
-    )
-    detail_columns[3].metric(
-        "LOCODE",
-        "Not supplied" if pd.isna(selected_port["locode"]) else str(selected_port["locode"]),
+    st.dataframe(
+        pd.DataFrame(
+            [
+                {
+                    "Port": selected_port["port"],
+                    "Country": selected_port["country"],
+                    "Latitude": selected_port["latitude"],
+                    "Longitude": selected_port["longitude"],
+                    "LOCODE": (
+                        "Not supplied"
+                        if pd.isna(selected_port["locode"])
+                        else selected_port["locode"]
+                    ),
+                    "Data quality": data_quality_for_mode(),
+                }
+            ]
+        ),
+        hide_index=True,
+        width="stretch",
     )
     observation_text = (
         "Synthetic coordinates and records; no real observation date."
@@ -512,7 +509,7 @@ else:
             st.info("No congestion row exists for this port at the selected week.")
         else:
             record = at_selected_week.iloc[0]
-            congestion_metrics = st.columns(4)
+            congestion_metrics = st.columns(3)
             congestion_metrics[0].metric(
                 "Synthetic wait (days)" if is_demo_mode() else "Historical wait (days as named)",
                 f"{record['avg_wait_days']:,.1f}",
@@ -522,12 +519,11 @@ else:
                 f"{record['congestion_index']:,.2f}",
             )
             congestion_metrics[2].metric(
-                "Vessels at anchor (as named)",
-                f"{record['vessels_at_anchor']:,}",
-            )
-            congestion_metrics[3].metric(
                 "Scenario week" if is_demo_mode() else "Historical week",
                 record["week_start"].strftime("%Y-%m-%d"),
+            )
+            st.caption(
+                f"Vessels at anchor (as named): {record['vessels_at_anchor']:,}"
             )
 
         measure = st.selectbox(
@@ -559,9 +555,7 @@ else:
             },
         )
         history_figure.update_layout(
-            template="plotly_dark",
-            paper_bgcolor="#0b1220",
-            plot_bgcolor="#0b1220",
+            template="rane_corporate",
             height=330,
         )
         st.plotly_chart(history_figure, width="stretch")
@@ -661,7 +655,7 @@ if animate_congestion:
             animation_frame="week_label",
             animation_group="port_id",
             color="congestion_index",
-            color_continuous_scale="YlOrRd",
+            color_continuous_scale="Blues",
             range_color=[
                 float(matched_congestion["congestion_index"].min()),
                 float(matched_congestion["congestion_index"].max()),
@@ -687,18 +681,19 @@ if animate_congestion:
             },
         )
         animation_figure.update_layout(
-            template="plotly_dark",
-            paper_bgcolor="#0b1220",
+            template="rane_corporate",
             height=560,
             geo={
                 "projection": {"type": "natural earth"},
                 "showland": True,
-                "landcolor": "#1b2a3d",
+                "landcolor": "#e6edf2",
                 "showocean": True,
-                "oceancolor": "#0d1a2a",
+                "oceancolor": "#f4f7fa",
                 "showcoastlines": True,
-                "coastlinecolor": "#52657e",
-                "bgcolor": "#0b1220",
+                "coastlinecolor": "#a9b8c5",
+                "showcountries": True,
+                "countrycolor": "#c8d3dc",
+                "bgcolor": "#f4f7fa",
             },
         )
         st.plotly_chart(animation_figure, width="stretch")
