@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import sys
 from datetime import date
 import html
 import hashlib
 import re
+from pathlib import Path
+
+PROJECT_ROOT = str(Path(__file__).resolve().parents[1])
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 import folium
 import pandas as pd
