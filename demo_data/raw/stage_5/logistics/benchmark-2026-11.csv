@@ -1,0 +1,25 @@
+corridor_id,mode,origin_code,origin,destination_code,destination,group,benchmark_usd,unit,low_usd,high_usd,error_band_pct,basis_grade,transit_min_days,transit_max_days,as_of
+DEMO-CORRIDOR-001,Ocean,DEMO-O-001,Demo A Harbor 1,DEMO-D-001,Demo C Harbor 2,Demo Ocean Group 1,3277.12,USD per illustrative 40ft container,2785.55,3768.69,15,Synthetic illustration only,16,21,2026-11-23
+DEMO-CORRIDOR-002,Ocean,DEMO-O-002,Demo A Harbor 2,DEMO-D-002,Demo D Harbor 1,Demo Ocean Group 2,8121.32,USD per illustrative tonne,6903.12,9339.51,15,Synthetic illustration only,14,36,2026-11-23
+DEMO-CORRIDOR-003,Ocean,DEMO-O-003,Demo B Harbor 1,DEMO-D-003,Demo D Harbor 2,Demo Ocean Group 3,5179.83,USD per illustrative 40ft container,4402.85,5956.8,15,Synthetic illustration only,9,20,2026-11-23
+DEMO-CORRIDOR-004,Ocean,DEMO-O-004,Demo B Harbor 2,DEMO-D-004,Demo E Harbor 1,Demo Ocean Group 1,2251.73,USD per illustrative tonne,1913.97,2589.49,15,Synthetic illustration only,12,31,2026-11-23
+DEMO-CORRIDOR-005,Ocean,DEMO-O-005,Demo C Harbor 1,DEMO-D-005,Demo E Harbor 2,Demo Ocean Group 2,6308.76,USD per illustrative 40ft container,5362.44,7255.07,15,Synthetic illustration only,7,33,2026-11-23
+DEMO-CORRIDOR-006,Ocean,DEMO-O-006,Demo C Harbor 2,DEMO-D-006,Demo F Harbor 1,Demo Ocean Group 3,2859.29,USD per illustrative tonne,2430.4,3288.19,15,Synthetic illustration only,9,44,2026-11-23
+DEMO-CORRIDOR-007,Ocean,DEMO-O-007,Demo D Harbor 1,DEMO-D-007,Demo F Harbor 2,Demo Ocean Group 1,1259.58,USD per illustrative 40ft container,1070.64,1448.52,15,Synthetic illustration only,10,24,2026-11-23
+DEMO-CORRIDOR-008,Ocean,DEMO-O-008,Demo D Harbor 2,DEMO-D-008,Demo A Harbor 1,Demo Ocean Group 2,8309.05,USD per illustrative tonne,7062.7,9555.41,15,Synthetic illustration only,17,24,2026-11-23
+DEMO-CORRIDOR-009,Ocean,DEMO-O-009,Demo E Harbor 1,DEMO-D-009,Demo A Harbor 2,Demo Ocean Group 3,4551.39,USD per illustrative 40ft container,3868.68,5234.1,15,Synthetic illustration only,10,34,2026-11-23
+DEMO-CORRIDOR-010,Ocean,DEMO-O-010,Demo E Harbor 2,DEMO-D-010,Demo B Harbor 1,Demo Ocean Group 1,3105.01,USD per illustrative tonne,2639.26,3570.76,15,Synthetic illustration only,10,35,2026-11-23
+DEMO-CORRIDOR-011,Ocean,DEMO-O-011,Demo F Harbor 1,DEMO-D-011,Demo B Harbor 2,Demo Ocean Group 2,3354.81,USD per illustrative 40ft container,2851.59,3858.03,15,Synthetic illustration only,13,23,2026-11-23
+DEMO-CORRIDOR-012,Ocean,DEMO-O-012,Demo F Harbor 2,DEMO-D-012,Demo C Harbor 1,Demo Ocean Group 3,1908.19,USD per illustrative tonne,1621.96,2194.42,15,Synthetic illustration only,8,51,2026-11-23
+DEMO-CORRIDOR-013,Air,DEMO-O-013,Demo Air Hub 1,DEMO-D-013,Demo Air Hub 3,Illustrative air corridors,8270.04,USD per illustrative 40ft container,7029.54,9510.55,15,Synthetic illustration only,10,33,2026-11-23
+DEMO-CORRIDOR-014,Air,DEMO-O-014,Demo Air Hub 2,DEMO-D-014,Demo Air Hub 4,Illustrative air corridors,2792.04,USD per illustrative tonne,2373.24,3210.85,15,Synthetic illustration only,14,22,2026-11-23
+DEMO-CORRIDOR-015,Air,DEMO-O-015,Demo Air Hub 3,DEMO-D-015,Demo Air Hub 5,Illustrative air corridors,4220.15,USD per illustrative 40ft container,3587.13,4853.17,15,Synthetic illustration only,13,33,2026-11-23
+DEMO-CORRIDOR-016,Air,DEMO-O-016,Demo Air Hub 4,DEMO-D-016,Demo Air Hub 6,Illustrative air corridors,2133.53,USD per illustrative tonne,1813.5,2453.55,15,Synthetic illustration only,12,44,2026-11-23
+DEMO-CORRIDOR-017,Air,DEMO-O-017,Demo Air Hub 5,DEMO-D-017,Demo Air Hub 1,Illustrative air corridors,2509.41,USD per illustrative 40ft container,2132.99,2885.82,15,Synthetic illustration only,14,42,2026-11-23
+DEMO-CORRIDOR-018,Air,DEMO-O-018,Demo Air Hub 6,DEMO-D-018,Demo Air Hub 2,Illustrative air corridors,3585.94,USD per illustrative tonne,3048.05,4123.83,15,Synthetic illustration only,6,20,2026-11-23
+DEMO-CORRIDOR-019,Truck,DEMO-O-019,Demo Inland Hub 1,DEMO-D-019,Demo Inland Hub 4,Illustrative land corridors,5134.32,USD per illustrative 40ft container,4364.17,5904.47,15,Synthetic illustration only,16,24,2026-11-23
+DEMO-CORRIDOR-020,Truck,DEMO-O-020,Demo Inland Hub 2,DEMO-D-020,Demo Inland Hub 5,Illustrative land corridors,923.26,USD per illustrative tonne,784.77,1061.75,15,Synthetic illustration only,15,35,2026-11-23
+DEMO-CORRIDOR-021,Truck,DEMO-O-021,Demo Inland Hub 3,DEMO-D-021,Demo Inland Hub 6,Illustrative land corridors,7490.0,USD per illustrative 40ft container,6366.5,8613.5,15,Synthetic illustration only,12,24,2026-11-23
+DEMO-CORRIDOR-022,Truck,DEMO-O-022,Demo Inland Hub 4,DEMO-D-022,Demo Inland Hub 1,Illustrative land corridors,7828.02,USD per illustrative tonne,6653.82,9002.22,15,Synthetic illustration only,11,34,2026-11-23
+DEMO-CORRIDOR-023,Truck,DEMO-O-023,Demo Inland Hub 5,DEMO-D-023,Demo Inland Hub 2,Illustrative land corridors,8129.24,USD per illustrative 40ft container,6909.86,9348.63,15,Synthetic illustration only,8,30,2026-11-23
+DEMO-CORRIDOR-024,Truck,DEMO-O-024,Demo Inland Hub 6,DEMO-D-024,Demo Inland Hub 3,Illustrative land corridors,4584.07,USD per illustrative tonne,3896.46,5271.69,15,Synthetic illustration only,15,24,2026-11-23

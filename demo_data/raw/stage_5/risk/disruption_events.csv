@@ -1,0 +1,37 @@
+date,year,event_name,disruption_type,region_affected,duration_days,bdi_shock_pct,freight_rate_shock_pct,severity,gdp_impact_pct,trade_volume_impact_pct,recovery_months,is_pandemic,is_geopolitical,is_natural,is_financial,straits_affected,port_closure
+2019-02-01,2019,Demo Logistics Event 01,logistics,Asia & Pacific,58,5,45,Low,-0.491,-22.755,10,0,0,0,0,1,1
+2019-04-01,2019,Demo Labor Event 02,labor,Asia & Pacific,41,25,15,Moderate,0.177,-21.656,11,0,0,0,0,0,0
+2019-06-01,2019,Demo Geopolitical Event 03,geopolitical,Europe,55,1,41,High,-1.211,-2.194,8,0,1,0,0,0,0
+2019-08-01,2019,Demo Natural Event 04,natural,North America,20,37,39,Low,-0.419,-8.634,13,0,0,1,0,0,0
+2019-10-01,2019,Demo Energy Event 05,energy,South America,56,7,21,Moderate,0.133,-4.668,10,0,0,0,1,0,0
+2019-12-01,2019,Demo Logistics Event 06,logistics,Africa,68,-22,10,High,-0.492,1.328,6,0,0,0,0,0,0
+2020-02-01,2020,Demo Labor Event 07,labor,Asia & Pacific,21,17,27,Low,-1.401,-1.088,8,0,0,0,0,0,0
+2020-04-01,2020,Demo Geopolitical Event 08,geopolitical,Asia & Pacific,20,-18,51,Moderate,-0.211,-22.285,1,0,1,0,0,0,0
+2020-06-01,2020,Demo Natural Event 09,natural,Europe,76,26,34,High,-0.589,-20.364,7,1,0,1,0,0,0
+2020-08-01,2020,Demo Energy Event 10,energy,North America,25,18,12,Low,0.373,-15.689,4,0,0,0,0,0,0
+2020-10-01,2020,Demo Logistics Event 11,logistics,South America,30,2,-19,Moderate,-0.999,-8.041,7,0,0,0,0,1,0
+2020-12-01,2020,Demo Labor Event 12,labor,Africa,56,30,27,High,-0.773,3.036,13,0,0,0,0,0,0
+2021-02-01,2021,Demo Geopolitical Event 13,geopolitical,Asia & Pacific,27,7,8,Low,-0.653,-3.804,1,0,1,0,0,0,0
+2021-04-01,2021,Demo Natural Event 14,natural,Asia & Pacific,43,-2,11,Moderate,0.228,-21.982,15,0,0,1,0,0,0
+2021-06-01,2021,Demo Energy Event 15,energy,Europe,79,-12,-17,High,-1.206,-3.672,5,0,0,0,1,0,0
+2021-08-01,2021,Demo Logistics Event 16,logistics,North America,58,-15,42,Low,-0.933,-8.961,15,0,0,0,0,0,1
+2021-10-01,2021,Demo Labor Event 17,labor,South America,38,14,36,Moderate,-0.52,2.36,9,0,0,0,0,0,0
+2021-12-01,2021,Demo Geopolitical Event 18,geopolitical,Africa,39,34,27,High,0.36,-10.797,13,0,1,0,0,0,0
+2022-02-01,2022,Demo Natural Event 19,natural,Asia & Pacific,77,-20,14,Low,0.305,-22.539,2,0,0,1,0,0,0
+2022-04-01,2022,Demo Energy Event 20,energy,Asia & Pacific,41,26,-6,Moderate,-0.368,-0.531,8,0,0,0,0,0,0
+2022-06-01,2022,Demo Logistics Event 21,logistics,Europe,20,29,51,High,-1.388,-24.796,10,0,0,0,0,1,0
+2022-08-01,2022,Demo Labor Event 22,labor,North America,26,17,35,Low,0.455,-7.226,12,0,0,0,0,0,0
+2022-10-01,2022,Demo Geopolitical Event 23,geopolitical,South America,5,36,26,Moderate,-0.236,-1.036,6,0,1,0,0,0,0
+2022-12-01,2022,Demo Natural Event 24,natural,Africa,40,36,54,High,-1.258,-12.243,5,0,0,1,0,0,0
+2023-02-01,2023,Demo Energy Event 25,energy,Asia & Pacific,32,11,-4,Low,-1.173,-11.454,12,0,0,0,1,0,0
+2023-04-01,2023,Demo Logistics Event 26,logistics,Asia & Pacific,69,25,-7,Moderate,-0.698,-7.211,3,0,0,0,0,0,0
+2023-06-01,2023,Demo Labor Event 27,labor,Europe,3,34,-19,High,-1.223,-7.084,7,0,0,0,0,0,0
+2023-08-01,2023,Demo Geopolitical Event 28,geopolitical,North America,8,0,-6,Low,-0.492,-20.16,7,0,1,0,0,0,0
+2023-10-01,2023,Demo Natural Event 29,natural,South America,70,38,53,Moderate,-0.252,-3.456,6,1,0,1,0,0,0
+2023-12-01,2023,Demo Energy Event 30,energy,Africa,70,-18,17,High,-1.097,-2.995,9,0,0,0,0,0,0
+2024-02-01,2024,Demo Logistics Event 31,logistics,Asia & Pacific,56,11,49,Low,-1.15,-24.966,7,0,0,0,0,1,1
+2024-04-01,2024,Demo Labor Event 32,labor,Asia & Pacific,60,26,-11,Moderate,-0.246,-1.002,5,0,0,0,0,0,0
+2024-06-01,2024,Demo Geopolitical Event 33,geopolitical,Europe,31,42,32,High,-0.614,3.156,6,0,1,0,0,0,0
+2024-08-01,2024,Demo Natural Event 34,natural,North America,24,36,-12,Low,0.404,-15.435,5,0,0,1,0,0,0
+2024-10-01,2024,Demo Energy Event 35,energy,South America,77,21,50,Moderate,-0.024,-5.149,8,0,0,0,1,0,0
+2024-12-01,2024,Demo Logistics Event 36,logistics,Africa,11,29,3,High,-0.018,1.182,15,0,0,0,0,0,0

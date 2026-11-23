@@ -1,0 +1,989 @@
+{
+  "synthetic": true,
+  "data_quality": "SYNTHETIC_ILLUSTRATIVE_DATA",
+  "notice": "Every record in this directory is synthetic and illustrative. No original workspace dataset or private RANE record was read or copied. No value represents an actual market observation, supplier, transaction, country statistic, event, port condition, route quote, or live intelligence.",
+  "seed": 20261123,
+  "scenario_as_of_date": "2026-11-23",
+  "generated_by": "scripts/generate_demo_data.py",
+  "datasets": {
+    "processed/material_market_data_integrated.csv": {
+      "description": "Synthetic material observations and a synthetic FX reference series.",
+      "records": 3404,
+      "columns": [
+        {
+          "name": "date",
+          "dtype": "str"
+        },
+        {
+          "name": "record_type",
+          "dtype": "str"
+        },
+        {
+          "name": "material",
+          "dtype": "str"
+        },
+        {
+          "name": "value",
+          "dtype": "float64"
+        },
+        {
+          "name": "currency",
+          "dtype": "str"
+        },
+        {
+          "name": "unit",
+          "dtype": "str"
+        },
+        {
+          "name": "source",
+          "dtype": "str"
+        },
+        {
+          "name": "source_url",
+          "dtype": "str"
+        },
+        {
+          "name": "extraction_date",
+          "dtype": "str"
+        },
+        {
+          "name": "data_quality",
+          "dtype": "str"
+        },
+        {
+          "name": "source_series",
+          "dtype": "str"
+        },
+        {
+          "name": "source_period",
+          "dtype": "str"
+        },
+        {
+          "name": "source_note",
+          "dtype": "str"
+        }
+      ],
+      "date_ranges": {
+        "date": {
+          "start": "2019-01-01",
+          "end": "2026-11-23"
+        }
+      },
+      "relationships": "Demo country codes/names and port names join exactly across the generated country, port, congestion, and route files."
+    },
+    "raw/stage_5/risk/chokepoint_daily.csv": {
+      "description": "Synthetic daily transit and capacity records.",
+      "records": 8628,
+      "columns": [
+        {
+          "name": "date",
+          "dtype": "str"
+        },
+        {
+          "name": "chokepoint_id",
+          "dtype": "str"
+        },
+        {
+          "name": "chokepoint",
+          "dtype": "str"
+        },
+        {
+          "name": "transits_container",
+          "dtype": "int64"
+        },
+        {
+          "name": "transits_dry_bulk",
+          "dtype": "int64"
+        },
+        {
+          "name": "transits_general_cargo",
+          "dtype": "int64"
+        },
+        {
+          "name": "transits_roro",
+          "dtype": "int64"
+        },
+        {
+          "name": "transits_tanker",
+          "dtype": "int64"
+        },
+        {
+          "name": "transits_cargo",
+          "dtype": "int64"
+        },
+        {
+          "name": "transits",
+          "dtype": "int64"
+        },
+        {
+          "name": "capacity_container",
+          "dtype": "float64"
+        },
+        {
+          "name": "capacity_dry_bulk",
+          "dtype": "float64"
+        },
+        {
+          "name": "capacity_general_cargo",
+          "dtype": "float64"
+        },
+        {
+          "name": "capacity_roro",
+          "dtype": "float64"
+        },
+        {
+          "name": "capacity_tanker",
+          "dtype": "float64"
+        },
+        {
+          "name": "capacity_cargo",
+          "dtype": "float64"
+        },
+        {
+          "name": "capacity",
+          "dtype": "float64"
+        }
+      ],
+      "date_ranges": {
+        "date": {
+          "start": "2019-01-01",
+          "end": "2026-11-15"
+        }
+      },
+      "relationships": "Demo country codes/names and port names join exactly across the generated country, port, congestion, and route files."
+    },
+    "raw/stage_5/risk/chokepoint_monthly.csv": {
+      "description": "Synthetic monthly chokepoint aggregates.",
+      "records": 285,
+      "columns": [
+        {
+          "name": "month",
+          "dtype": "str"
+        },
+        {
+          "name": "chokepoint_id",
+          "dtype": "str"
+        },
+        {
+          "name": "chokepoint",
+          "dtype": "str"
+        },
+        {
+          "name": "days",
+          "dtype": "int64"
+        },
+        {
+          "name": "transits_per_day",
+          "dtype": "float64"
+        },
+        {
+          "name": "container_transits_per_day",
+          "dtype": "float64"
+        },
+        {
+          "name": "tanker_transits_per_day",
+          "dtype": "float64"
+        },
+        {
+          "name": "capacity_per_day",
+          "dtype": "float64"
+        },
+        {
+          "name": "transits_yoy_pct",
+          "dtype": "float64"
+        }
+      ],
+      "date_ranges": {
+        "month": {
+          "start": "2019-01-01",
+          "end": "2026-11-01"
+        }
+      },
+      "relationships": "Demo country codes/names and port names join exactly across the generated country, port, congestion, and route files."
+    },
+    "raw/stage_5/risk/country_monthly.csv": {
+      "description": "Synthetic country-level monthly measures.",
+      "records": 658,
+      "columns": [
+        {
+          "name": "month",
+          "dtype": "str"
+        },
+        {
+          "name": "iso3",
+          "dtype": "str"
+        },
+        {
+          "name": "country",
+          "dtype": "str"
+        },
+        {
+          "name": "days",
+          "dtype": "int64"
+        },
+        {
+          "name": "portcalls",
+          "dtype": "int64"
+        },
+        {
+          "name": "portcalls_container",
+          "dtype": "int64"
+        },
+        {
+          "name": "import",
+          "dtype": "float64"
+        },
+        {
+          "name": "export",
+          "dtype": "float64"
+        },
+        {
+          "name": "import_container",
+          "dtype": "float64"
+        },
+        {
+          "name": "export_container",
+          "dtype": "float64"
+        },
+        {
+          "name": "trade_yoy_pct",
+          "dtype": "float64"
+        }
+      ],
+      "date_ranges": {
+        "month": {
+          "start": "2019-01-01",
+          "end": "2026-10-01"
+        }
+      },
+      "relationships": "Demo country codes/names and port names join exactly across the generated country, port, congestion, and route files."
+    },
+    "raw/stage_5/risk/country_daily.parquet": {
+      "description": "Synthetic daily country measures; aggregate row uses code 1.",
+      "records": 7406,
+      "columns": [
+        {
+          "name": "date",
+          "dtype": "datetime64[us]"
+        },
+        {
+          "name": "iso3",
+          "dtype": "string"
+        },
+        {
+          "name": "country",
+          "dtype": "string"
+        },
+        {
+          "name": "is_aggregate",
+          "dtype": "bool"
+        },
+        {
+          "name": "portcalls_container",
+          "dtype": "int64"
+        },
+        {
+          "name": "portcalls_dry_bulk",
+          "dtype": "int64"
+        },
+        {
+          "name": "portcalls_general_cargo",
+          "dtype": "int64"
+        },
+        {
+          "name": "portcalls_roro",
+          "dtype": "int64"
+        },
+        {
+          "name": "portcalls_tanker",
+          "dtype": "int64"
+        },
+        {
+          "name": "portcalls_cargo",
+          "dtype": "int64"
+        },
+        {
+          "name": "portcalls",
+          "dtype": "int64"
+        },
+        {
+          "name": "import_container",
+          "dtype": "float64"
+        },
+        {
+          "name": "import_dry_bulk",
+          "dtype": "float64"
+        },
+        {
+          "name": "import_general_cargo",
+          "dtype": "float64"
+        },
+        {
+          "name": "import_roro",
+          "dtype": "float64"
+        },
+        {
+          "name": "import_tanker",
+          "dtype": "float64"
+        },
+        {
+          "name": "import_cargo",
+          "dtype": "float64"
+        },
+        {
+          "name": "import",
+          "dtype": "float64"
+        },
+        {
+          "name": "export_container",
+          "dtype": "float64"
+        },
+        {
+          "name": "export_dry_bulk",
+          "dtype": "float64"
+        },
+        {
+          "name": "export_general_cargo",
+          "dtype": "float64"
+        },
+        {
+          "name": "export_roro",
+          "dtype": "float64"
+        },
+        {
+          "name": "export_tanker",
+          "dtype": "float64"
+        },
+        {
+          "name": "export_cargo",
+          "dtype": "float64"
+        },
+        {
+          "name": "export",
+          "dtype": "float64"
+        },
+        {
+          "name": "shipment",
+          "dtype": "float64"
+        },
+        {
+          "name": "portcalls_container_30ma",
+          "dtype": "float64"
+        },
+        {
+          "name": "portcalls_container_30ma_yoy",
+          "dtype": "float64"
+        },
+        {
+          "name": "shipment_30ma",
+          "dtype": "float64"
+        },
+        {
+          "name": "shipment_30ma_yoy",
+          "dtype": "float64"
+        }
+      ],
+      "date_ranges": {
+        "date": {
+          "start": "2024-01-01",
+          "end": "2026-11-23"
+        }
+      },
+      "relationships": "Demo country codes/names and port names join exactly across the generated country, port, congestion, and route files."
+    },
+    "raw/stage_5/risk/gscpi.csv": {
+      "description": "Synthetic index-shaped series; not the official GSCPI.",
+      "records": 346,
+      "columns": [
+        {
+          "name": "month",
+          "dtype": "str"
+        },
+        {
+          "name": "gscpi",
+          "dtype": "float64"
+        }
+      ],
+      "date_ranges": {
+        "month": {
+          "start": "1998-01-01",
+          "end": "2026-10-01"
+        }
+      },
+      "relationships": "Demo country codes/names and port names join exactly across the generated country, port, congestion, and route files."
+    },
+    "raw/stage_5/risk/disruption_events.csv": {
+      "description": "Fictional disruption scenarios, not recorded events.",
+      "records": 36,
+      "columns": [
+        {
+          "name": "date",
+          "dtype": "str"
+        },
+        {
+          "name": "year",
+          "dtype": "int64"
+        },
+        {
+          "name": "event_name",
+          "dtype": "str"
+        },
+        {
+          "name": "disruption_type",
+          "dtype": "str"
+        },
+        {
+          "name": "region_affected",
+          "dtype": "str"
+        },
+        {
+          "name": "duration_days",
+          "dtype": "int64"
+        },
+        {
+          "name": "bdi_shock_pct",
+          "dtype": "int64"
+        },
+        {
+          "name": "freight_rate_shock_pct",
+          "dtype": "int64"
+        },
+        {
+          "name": "severity",
+          "dtype": "str"
+        },
+        {
+          "name": "gdp_impact_pct",
+          "dtype": "float64"
+        },
+        {
+          "name": "trade_volume_impact_pct",
+          "dtype": "float64"
+        },
+        {
+          "name": "recovery_months",
+          "dtype": "int64"
+        },
+        {
+          "name": "is_pandemic",
+          "dtype": "int64"
+        },
+        {
+          "name": "is_geopolitical",
+          "dtype": "int64"
+        },
+        {
+          "name": "is_natural",
+          "dtype": "int64"
+        },
+        {
+          "name": "is_financial",
+          "dtype": "int64"
+        },
+        {
+          "name": "straits_affected",
+          "dtype": "int64"
+        },
+        {
+          "name": "port_closure",
+          "dtype": "int64"
+        }
+      ],
+      "date_ranges": {
+        "date": {
+          "start": "2019-02-01",
+          "end": "2024-12-01"
+        }
+      },
+      "relationships": "Demo country codes/names and port names join exactly across the generated country, port, congestion, and route files."
+    },
+    "raw/stage_5/risk/industry_exposure.csv": {
+      "description": "Fictional industry-level illustrative indicators.",
+      "records": 80,
+      "columns": [
+        {
+          "name": "year",
+          "dtype": "int64"
+        },
+        {
+          "name": "industry",
+          "dtype": "str"
+        },
+        {
+          "name": "pandemic_exposure",
+          "dtype": "float64"
+        },
+        {
+          "name": "geopolitical_exposure",
+          "dtype": "float64"
+        },
+        {
+          "name": "natural_disaster_exposure",
+          "dtype": "float64"
+        },
+        {
+          "name": "tariff_exposure",
+          "dtype": "float64"
+        },
+        {
+          "name": "logistics_exposure",
+          "dtype": "float64"
+        },
+        {
+          "name": "energy_exposure",
+          "dtype": "float64"
+        },
+        {
+          "name": "labor_exposure",
+          "dtype": "float64"
+        },
+        {
+          "name": "cyber_exposure",
+          "dtype": "float64"
+        },
+        {
+          "name": "overall_vulnerability",
+          "dtype": "float64"
+        },
+        {
+          "name": "inventory_days",
+          "dtype": "int64"
+        },
+        {
+          "name": "supplier_concentration_hhi",
+          "dtype": "float64"
+        },
+        {
+          "name": "just_in_time_dependency",
+          "dtype": "float64"
+        },
+        {
+          "name": "nearshoring_score_2024",
+          "dtype": "float64"
+        }
+      ],
+      "date_ranges": {},
+      "relationships": "Demo country codes/names and port names join exactly across the generated country, port, congestion, and route files."
+    },
+    "raw/stage_5/risk/tariff_timeline.csv": {
+      "description": "Fictional policy scenarios, not actual tariff actions.",
+      "records": 42,
+      "columns": [
+        {
+          "name": "tariff_id",
+          "dtype": "str"
+        },
+        {
+          "name": "date",
+          "dtype": "str"
+        },
+        {
+          "name": "year",
+          "dtype": "int64"
+        },
+        {
+          "name": "month",
+          "dtype": "int64"
+        },
+        {
+          "name": "imposing_country",
+          "dtype": "str"
+        },
+        {
+          "name": "target_country",
+          "dtype": "str"
+        },
+        {
+          "name": "policy_name",
+          "dtype": "str"
+        },
+        {
+          "name": "tariff_rate_pct",
+          "dtype": "float64"
+        },
+        {
+          "name": "estimated_value_usd_bn",
+          "dtype": "float64"
+        },
+        {
+          "name": "description",
+          "dtype": "str"
+        },
+        {
+          "name": "is_trump_1_0",
+          "dtype": "int64"
+        },
+        {
+          "name": "is_biden",
+          "dtype": "int64"
+        },
+        {
+          "name": "is_trump_2_0",
+          "dtype": "int64"
+        },
+        {
+          "name": "is_retaliation",
+          "dtype": "int64"
+        },
+        {
+          "name": "is_section_232",
+          "dtype": "int64"
+        },
+        {
+          "name": "is_section_301",
+          "dtype": "int64"
+        },
+        {
+          "name": "is_ieepa",
+          "dtype": "int64"
+        }
+      ],
+      "date_ranges": {
+        "date": {
+          "start": "2019-03-01",
+          "end": "2026-01-01"
+        },
+        "month": {
+          "start": "1970-01-01",
+          "end": "1970-01-01"
+        }
+      },
+      "relationships": "Demo country codes/names and port names join exactly across the generated country, port, congestion, and route files."
+    },
+    "raw/stage_5/risk/trade_flows.csv": {
+      "description": "Fictional country-pair/category values, not customs records.",
+      "records": 720,
+      "columns": [
+        {
+          "name": "year",
+          "dtype": "int64"
+        },
+        {
+          "name": "exporter",
+          "dtype": "str"
+        },
+        {
+          "name": "importer",
+          "dtype": "str"
+        },
+        {
+          "name": "trade_category",
+          "dtype": "str"
+        },
+        {
+          "name": "key_goods",
+          "dtype": "str"
+        },
+        {
+          "name": "trade_value_bn_usd",
+          "dtype": "float64"
+        },
+        {
+          "name": "yoy_growth_pct",
+          "dtype": "float64"
+        },
+        {
+          "name": "effective_tariff_rate_pct",
+          "dtype": "float64"
+        },
+        {
+          "name": "trade_active",
+          "dtype": "int64"
+        },
+        {
+          "name": "supply_chain_integrated",
+          "dtype": "int64"
+        },
+        {
+          "name": "concentration_risk",
+          "dtype": "float64"
+        }
+      ],
+      "date_ranges": {},
+      "relationships": "Demo country codes/names and port names join exactly across the generated country, port, congestion, and route files."
+    },
+    "raw/stage_5/logistics/ports.csv": {
+      "description": "Fictional ports and generated coordinates.",
+      "records": 12,
+      "columns": [
+        {
+          "name": "port_id",
+          "dtype": "str"
+        },
+        {
+          "name": "port",
+          "dtype": "str"
+        },
+        {
+          "name": "country",
+          "dtype": "str"
+        },
+        {
+          "name": "iso3",
+          "dtype": "str"
+        },
+        {
+          "name": "continent",
+          "dtype": "str"
+        },
+        {
+          "name": "locode",
+          "dtype": "str"
+        },
+        {
+          "name": "latitude",
+          "dtype": "float64"
+        },
+        {
+          "name": "longitude",
+          "dtype": "float64"
+        },
+        {
+          "name": "vessels_total",
+          "dtype": "int64"
+        },
+        {
+          "name": "vessels_container",
+          "dtype": "int64"
+        },
+        {
+          "name": "vessels_dry_bulk",
+          "dtype": "int64"
+        },
+        {
+          "name": "vessels_general_cargo",
+          "dtype": "int64"
+        },
+        {
+          "name": "vessels_roro",
+          "dtype": "int64"
+        },
+        {
+          "name": "vessels_tanker",
+          "dtype": "int64"
+        },
+        {
+          "name": "industry_1",
+          "dtype": "str"
+        },
+        {
+          "name": "industry_2",
+          "dtype": "str"
+        },
+        {
+          "name": "industry_3",
+          "dtype": "str"
+        },
+        {
+          "name": "share_of_country_imports",
+          "dtype": "float64"
+        },
+        {
+          "name": "share_of_country_exports",
+          "dtype": "float64"
+        }
+      ],
+      "date_ranges": {},
+      "relationships": "Demo country codes/names and port names join exactly across the generated country, port, congestion, and route files."
+    },
+    "raw/stage_5/logistics/port_congestion.csv": {
+      "description": "Fictional weekly port measures.",
+      "records": 4932,
+      "columns": [
+        {
+          "name": "week_start",
+          "dtype": "str"
+        },
+        {
+          "name": "year",
+          "dtype": "int64"
+        },
+        {
+          "name": "port",
+          "dtype": "str"
+        },
+        {
+          "name": "country",
+          "dtype": "str"
+        },
+        {
+          "name": "region",
+          "dtype": "str"
+        },
+        {
+          "name": "throughput_teu_mn",
+          "dtype": "int64"
+        },
+        {
+          "name": "vessels_at_anchor",
+          "dtype": "int64"
+        },
+        {
+          "name": "avg_wait_days",
+          "dtype": "float64"
+        },
+        {
+          "name": "congestion_index",
+          "dtype": "float64"
+        },
+        {
+          "name": "port_utilization_pct",
+          "dtype": "float64"
+        },
+        {
+          "name": "berth_delay_hrs",
+          "dtype": "float64"
+        }
+      ],
+      "date_ranges": {
+        "week_start": {
+          "start": "2019-01-07",
+          "end": "2026-11-16"
+        }
+      },
+      "relationships": "Demo country codes/names and port names join exactly across the generated country, port, congestion, and route files."
+    },
+    "raw/stage_5/logistics/shipping_rates.csv": {
+      "description": "Fictional monthly shipping indices and rates.",
+      "records": 95,
+      "columns": [
+        {
+          "name": "date",
+          "dtype": "str"
+        },
+        {
+          "name": "year",
+          "dtype": "int32"
+        },
+        {
+          "name": "month",
+          "dtype": "int32"
+        },
+        {
+          "name": "baltic_dry_index",
+          "dtype": "int64"
+        },
+        {
+          "name": "container_rate_usd_40ft",
+          "dtype": "int64"
+        },
+        {
+          "name": "air_cargo_rate_usd_kg",
+          "dtype": "float64"
+        },
+        {
+          "name": "bdi_mom_change_pct",
+          "dtype": "float64"
+        },
+        {
+          "name": "container_yoy_pct",
+          "dtype": "float64"
+        },
+        {
+          "name": "tanker_rate_aframax_usd_day",
+          "dtype": "int64"
+        },
+        {
+          "name": "bulk_carrier_handysize_usd_day",
+          "dtype": "int64"
+        },
+        {
+          "name": "supply_chain_pressure_index",
+          "dtype": "float64"
+        },
+        {
+          "name": "on_time_delivery_pct",
+          "dtype": "float64"
+        }
+      ],
+      "date_ranges": {
+        "date": {
+          "start": "2019-01-01",
+          "end": "2026-11-01"
+        },
+        "month": {
+          "start": "1970-01-01",
+          "end": "1970-01-01"
+        }
+      },
+      "relationships": "Demo country codes/names and port names join exactly across the generated country, port, congestion, and route files."
+    },
+    "raw/stage_5/logistics/benchmark-2026-11.csv": {
+      "description": "Fictional one-date route benchmark snapshot.",
+      "records": 24,
+      "columns": [
+        {
+          "name": "corridor_id",
+          "dtype": "str"
+        },
+        {
+          "name": "mode",
+          "dtype": "str"
+        },
+        {
+          "name": "origin_code",
+          "dtype": "str"
+        },
+        {
+          "name": "origin",
+          "dtype": "str"
+        },
+        {
+          "name": "destination_code",
+          "dtype": "str"
+        },
+        {
+          "name": "destination",
+          "dtype": "str"
+        },
+        {
+          "name": "group",
+          "dtype": "str"
+        },
+        {
+          "name": "benchmark_usd",
+          "dtype": "float64"
+        },
+        {
+          "name": "unit",
+          "dtype": "str"
+        },
+        {
+          "name": "low_usd",
+          "dtype": "float64"
+        },
+        {
+          "name": "high_usd",
+          "dtype": "float64"
+        },
+        {
+          "name": "error_band_pct",
+          "dtype": "int64"
+        },
+        {
+          "name": "basis_grade",
+          "dtype": "str"
+        },
+        {
+          "name": "transit_min_days",
+          "dtype": "int64"
+        },
+        {
+          "name": "transit_max_days",
+          "dtype": "int64"
+        },
+        {
+          "name": "as_of",
+          "dtype": "str"
+        }
+      ],
+      "date_ranges": {
+        "as_of": {
+          "start": "2026-11-23",
+          "end": "2026-11-23"
+        }
+      },
+      "relationships": "Demo country codes/names and port names join exactly across the generated country, port, congestion, and route files."
+    }
+  }
+}

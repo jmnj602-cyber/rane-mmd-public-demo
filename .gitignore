@@ -1,0 +1,62 @@
+# Only the explicitly synthetic demo_data/ directory may be published.
+/data/
+/raw_data/
+/external_data/
+/confidential/
+/private/
+/company_data/
+/archive*/
+*.zip
+*.xlsx
+*.xls
+*.xlsb
+*.pdf
+*.parquet
+!/demo_data/raw/stage_5/risk/country_daily.parquet
+
+# Historical audit and deployment reports are not approved for publication.
+/documentation/
+/tests/
+/DATA_INVENTORY.md
+/DATA_QUALITY_REPORT.md
+/MISSING_DATA_REPORT.md
+/MODULE_DATA_MAPPING.md
+/STAGE_3_SOURCE_VERIFICATION_REPORT.md
+/DEPLOYMENT_GUIDE.md
+/FINAL_PROJECT_REPORT.md
+/FINAL_DATA_LIMITATIONS.md
+*_confidential.*
+*_private.*
+
+# Credentials and local configuration.
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+secrets.toml
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Python environments, bytecode, and test/analysis output.
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.log
+
+# Editor and operating-system state.
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.ipynb_checkpoints/
